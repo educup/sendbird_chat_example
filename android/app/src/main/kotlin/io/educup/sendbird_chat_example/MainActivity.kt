@@ -1,4 +1,4 @@
-package com.example.sendbird_chat_test
+package io.educup.sendbird_chat_example
 
 import io.flutter.embedding.android.FlutterActivity
 
