@@ -22,12 +22,14 @@ class SendBirdExampleApp extends StatelessWidget {
     return BeamerProvider(
       routerDelegate: AppRouter.routerDelegate,
       child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          routeInformationParser: AppRouter.routeInformationParser,
-          routerDelegate: AppRouter.routerDelegate),
+        scrollBehavior: CustomScrollBehavior(),
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        routeInformationParser: AppRouter.routeInformationParser,
+        routerDelegate: AppRouter.routerDelegate,
+      ),
     );
   }
 }

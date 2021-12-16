@@ -23,12 +23,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController controller;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController(text: '');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
   }
 
   @override
@@ -38,23 +45,43 @@ class _HomePageState extends State<HomePage> {
         title: const Text(Constants.homeTitle),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextFormField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      hintText: 'User Name',
+                      labelText: 'User Name',
+                    ),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'User Name must not be empty!'
+                        : null,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      bool status = _formKey.currentState?.validate() ?? false;
+                      if (status) {
+                        final userID = controller.text;
+                        context.beamToNamed('$userID/chats');
+                      }
+                    },
+                    child: const Text('Go to Chats'),
+                  ),
+                ],
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
