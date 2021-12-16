@@ -10,6 +10,7 @@ class AppRouter {
     locationBuilder: BeamerLocationBuilder(
       beamLocations: [
         HomeLocation(),
+        ChatsLocation(),
       ],
     ),
     initialPath: '/',

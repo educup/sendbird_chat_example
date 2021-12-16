@@ -8,10 +8,13 @@ class HomePage extends StatefulWidget {
   }) : super(key: key);
 
   static BeamPage getPage(BuildContext context) {
+    const key = ValueKey('home');
     return const BeamPage(
-      key: ValueKey('home'),
+      key: key,
       title: Constants.homeTitle,
-      child: HomePage(),
+      child: HomePage(
+        key: key,
+      ),
     );
   }
 

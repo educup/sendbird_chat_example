@@ -1,9 +1,7 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:sendbird_chat_test/src/pages/pages.dart';
 import 'package:sendbird_chat_test/src/router/router.dart';
-import 'package:sendbird_chat_test/src/utils/constants.dart';
 
 class CustomScrollBehavior extends MaterialScrollBehavior {
   @override

@@ -1,6 +1,6 @@
 import 'package:beamer/beamer.dart';
 
-extension _BeamStateParams on BeamState {
+extension BeamStateParams on BeamState {
   bool matchSegment(int segment, String pattern) {
     if (uri.pathSegments.length <= segment) return false;
 
