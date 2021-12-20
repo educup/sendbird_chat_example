@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:sendbird_chat_test/src/app.dart';
+import 'package:sendbird_chat_test/src/dependencies.dart';
 
 void main() async {
   FlutterError.onError = (details) {
@@ -14,6 +15,7 @@ void main() async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
       Beamer.setPathUrlStrategy();
+      await configureDependencies();
       runApp(const SendBirdExampleApp());
     },
     (error, stackTrace) {},
