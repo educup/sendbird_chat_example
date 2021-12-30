@@ -6,7 +6,9 @@
 
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
-import 'package:sendbird_chat_test/src/dependencies.dart' as _i4;
+import 'package:sendbird_chat_test/src/blocs/chats_list_bloc/chats_list_bloc.dart'
+    as _i4;
+import 'package:sendbird_chat_test/src/dependencies.dart' as _i5;
 import 'package:sendbird_chat_test/src/repositories/messaging_repository.dart'
     as _i3; // ignore_for_file: unnecessary_lambdas
 
@@ -20,7 +22,9 @@ _i1.GetIt $initGetIt(_i1.GetIt get,
       instanceName: 'sendbird-app-id');
   gh.lazySingleton<_i3.MessagingRepository>(() => _i3.MessagingRepository(
       appId: get<String>(instanceName: 'sendbird-app-id')));
+  gh.factory<_i4.ChatsListBloc>(() =>
+      _i4.ChatsListBloc(messagingRepository: get<_i3.MessagingRepository>()));
   return get;
 }
 
-class _$RegisterModule extends _i4.RegisterModule {}
+class _$RegisterModule extends _i5.RegisterModule {}
