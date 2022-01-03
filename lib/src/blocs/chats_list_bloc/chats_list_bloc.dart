@@ -22,7 +22,7 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
             chats: chats,
           ),
         );
-      } on Exception catch (e) {
+      } catch (e) {
         emit(
           ChatsListLoadFailure(
             message: e.toString(),
@@ -39,7 +39,7 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
             chats: chats,
           ),
         );
-      } on Exception catch (e) {
+      } catch (e) {
         emit(
           ChatsListLoadFailure(
             message: e.toString(),
@@ -60,7 +60,7 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
             chats: chats,
           ),
         );
-      } on Exception catch (e) {
+      } catch (e) {
         emit(
           ChatsListLoadFailure(
             message: e.toString(),
