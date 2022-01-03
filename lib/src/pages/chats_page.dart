@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sendbird_chat_test/src/blocs/blocs.dart';
 import 'package:sendbird_chat_test/src/pages/new_chat_page.dart';
-import 'package:sendbird_sdk/core/channel/group/group_channel.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChatsPage extends StatelessWidget {
   const ChatsPage({
@@ -92,15 +92,26 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
               ),
             );
           } else if (state is ChatsListLoadSuccess) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (final chat in state.chats) buildChatPreview(chat),
-                  if (state.chats.isEmpty) const Text('No chats found'),
-                ],
-              ),
-            );
+            if (state.chats.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text('No chats found'),
+                  ],
+                ),
+              );
+            } else {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    for (final chat in state.chats) buildChatPreview(chat),
+                  ],
+                ),
+              );
+            }
           } else if (state is ChatsListLoadInProgress) {
             return Center(
               child: Column(
@@ -117,19 +128,34 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
     );
   }
 
-  Card buildChatPreview(GroupChannel chat) {
-    String chatCompanion = 'Someone';
+  Widget buildChatPreview(GroupChannel chat) {
+    String chatCompanionId = 'Someone';
     for (final member in chat.members) {
       if (member.userId != widget.userId) {
-        chatCompanion = member.userId;
+        chatCompanionId = member.userId;
         break;
       }
     }
-    return Card(
-      child: Container(
-        margin: const EdgeInsets.all(5),
-        child: Text('Chat with $chatCompanion'),
-      ),
+
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () {},
+            child: Card(
+              margin: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 5,
+              ),
+              child: Container(
+                height: 100,
+                margin: const EdgeInsets.all(5),
+                child: Text('Chat with $chatCompanionId'),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
