@@ -25,7 +25,7 @@ class MessagingRepository {
     final params = GroupChannelParams()
       ..channelUrl = pvUrl
       ..userIds = [userId1, userId2]
-      ..isDistinct = false;
+      ..isDistinct = true;
     return GroupChannel.createChannel(params);
   }
 
