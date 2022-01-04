@@ -33,12 +33,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ));
       }
     });
-    on<ChatEventRefreshed>((event, emit) async {
+    on<ChatEventHistoricalMessagesLoaded>((event, emit) async {
       try {
         final messages = event.actualMessages;
         final historicalMessages = event.historicalMessages;
+
         final newHistoricalMessages = await historicalMessages.loadNext();
         messages.addAll(newHistoricalMessages);
+
         emit(ChatLoadSuccess(
           messages: messages,
           historicalMessages: historicalMessages,

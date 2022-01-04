@@ -20,11 +20,11 @@ class ChatEventStarted extends ChatEvent {
         );
 }
 
-class ChatEventRefreshed extends ChatEvent {
+class ChatEventHistoricalMessagesLoaded extends ChatEvent {
   final List<BaseMessage> actualMessages;
   final PreviousMessageListQuery historicalMessages;
 
-  ChatEventRefreshed({
+  ChatEventHistoricalMessagesLoaded({
     required String userId,
     required String otherId,
     required this.actualMessages,
