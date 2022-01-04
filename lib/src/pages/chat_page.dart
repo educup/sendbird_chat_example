@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sendbird_chat_test/src/blocs/blocs.dart';
 import 'package:sendbird_chat_test/src/repositories/messaging_repository.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart' as sendbird;
@@ -125,16 +128,12 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                 messages: _buildChatViewMessages(
                   state.messages,
                 ),
-                onSendPressed: (partialText) {
-                  context.read<ChatBloc>().add(
-                        ChatMessageSendedEvent(
-                          userId: widget.userId,
-                          otherId: widget.otherId,
-                          message: partialText.text,
-                        ),
-                      );
-                },
-                user: types.User(id: widget.userId),
+                onSendPressed: _handleSendPressed,
+                onAttachmentPressed: _handleAttachmentPressed,
+                user: types.User(
+                  id: widget.userId,
+                  firstName: widget.userId,
+                ),
               ),
             );
           }
@@ -142,6 +141,35 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
         },
       ),
     );
+  }
+
+  void _handleSendPressed(types.PartialText partialText) {
+    context.read<ChatBloc>().add(
+          ChatTextMessageSendedEvent(
+            userId: widget.userId,
+            otherId: widget.otherId,
+            message: partialText.text,
+          ),
+        );
+  }
+
+  void _handleAttachmentPressed() async {
+    final image = await ImagePicker().pickImage(
+      imageQuality: 70,
+      maxWidth: 1440,
+      source: ImageSource.gallery,
+    );
+
+    if (image != null) {
+      context.read<ChatBloc>().add(
+            ChatFileMessageSendedEvent(
+              userId: widget.userId,
+              otherId: widget.otherId,
+              filename: image.name,
+              file: File(image.path),
+            ),
+          );
+    }
   }
 
   List<types.Message> _buildChatViewMessages(
@@ -153,9 +181,21 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
           return types.TextMessage(
             id: message.messageId.toString(),
             author: types.User(
-              id: message.sender!.userId,
+              id: message.sender?.userId ?? 'unknown',
             ),
             text: message.message,
+            createdAt: message.createdAt,
+            updatedAt: message.updatedAt,
+          );
+        } else if (message is sendbird.FileMessage) {
+          return types.ImageMessage(
+            id: message.messageId.toString(),
+            author: types.User(
+              id: message.sender?.userId ?? 'unknown',
+            ),
+            name: message.name!,
+            size: message.size ?? 0,
+            uri: message.localFile?.path ?? message.secureUrl ?? message.url,
           );
         }
         return null;

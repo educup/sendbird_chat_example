@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChatEvent {
@@ -33,13 +35,28 @@ class ChatHistoricalMessagesLoadedEvent extends ChatEvent {
         );
 }
 
-class ChatMessageSendedEvent extends ChatEvent {
+class ChatTextMessageSendedEvent extends ChatEvent {
   final String message;
 
-  ChatMessageSendedEvent({
+  ChatTextMessageSendedEvent({
     required String userId,
     required String otherId,
     required this.message,
+  }) : super(
+          userId: userId,
+          otherId: otherId,
+        );
+}
+
+class ChatFileMessageSendedEvent extends ChatEvent {
+  final String filename;
+  final File file;
+
+  ChatFileMessageSendedEvent({
+    required String userId,
+    required String otherId,
+    required this.filename,
+    required this.file,
   }) : super(
           userId: userId,
           otherId: otherId,

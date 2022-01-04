@@ -59,7 +59,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
     });
 
-    on<ChatMessageSendedEvent>((event, emit) async {
+    on<ChatTextMessageSendedEvent>((event, emit) async {
       try {
         final pv = await messagingRepository.getPrivateChat(
           event.userId,
@@ -68,6 +68,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         final message = await messagingRepository.sendMessage(
           pv,
           event.message,
+        );
+        messages.insert(0, message);
+
+        emit(ChatLoadSuccess(
+          messages: messages,
+        ));
+      } catch (e) {
+        emit(ChatLoadFailure(
+          errorMessage: e.toString(),
+        ));
+      }
+    });
+
+    on<ChatFileMessageSendedEvent>((event, emit) async {
+      try {
+        final pv = await messagingRepository.getPrivateChat(
+          event.userId,
+          event.otherId,
+        );
+        final message = await messagingRepository.sendFile(
+          pv,
+          event.file,
+          filename: event.filename,
         );
         messages.insert(0, message);
 

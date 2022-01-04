@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:injectable/injectable.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 
@@ -54,10 +55,26 @@ class MessagingRepository {
   }) async {
     final params = UserMessageParams(message: message)
       ..parentMessageId = replyTo;
-    final premessage = groupChannel.sendUserMessage(
+    final userMessage = groupChannel.sendUserMessage(
       params,
     );
-    return premessage;
+    return userMessage;
+  }
+
+  Future<FileMessage> sendFile(
+    GroupChannel groupChannel,
+    File file, {
+    String? filename,
+    int? replyTo,
+  }) async {
+    final params = FileMessageParams.withFile(
+      file,
+      name: filename,
+    )..parentMessageId = replyTo;
+    final fileMessage = groupChannel.sendFileMessage(
+      params,
+    );
+    return fileMessage;
   }
 
   String buildPrivateChatUrl(
