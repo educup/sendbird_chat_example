@@ -64,7 +64,19 @@ class MessagingRepository {
     String id1,
     String id2,
   ) {
-    return 'pv-$id1-$id2';
+    String? first;
+    String? last;
+
+    final compare = id1.compareTo(id2);
+    if (compare < 0) {
+      first = id1;
+      last = id2;
+    } else {
+      first = id2;
+      last = id1;
+    }
+
+    return 'pv-$first-$last';
   }
 
   PreviousMessageListQuery getHistoricalMessages(
