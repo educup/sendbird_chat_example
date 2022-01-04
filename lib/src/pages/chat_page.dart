@@ -5,6 +5,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:get_it/get_it.dart';
 import 'package:sendbird_chat_test/src/blocs/blocs.dart';
+import 'package:sendbird_chat_test/src/repositories/messaging_repository.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart' as sendbird;
 
 class ChatPage extends StatelessWidget {
@@ -39,13 +40,7 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ChatBloc>(
-      create: (context) => GetIt.I()
-        ..add(
-          ChatStartedEvent(
-            userId: userId,
-            otherId: otherId,
-          ),
-        ),
+      create: (context) => GetIt.I(),
       child: ChatPageWidget(
         userId: userId,
         otherId: otherId,
@@ -76,7 +71,28 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
         title: Text(widget.otherId),
       ),
       body: BlocConsumer<ChatBloc, ChatState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is ChatInitialState) {
+            context.read<ChatBloc>().add(
+                  ChatStartedEvent(
+                    userId: widget.userId,
+                    otherId: widget.otherId,
+                    channelHandler: ChatEventHandler(
+                      userId: widget.userId,
+                      otherId: widget.otherId,
+                      onMessageReceivedCallback: (message) =>
+                          context.read<ChatBloc>().add(
+                                ChatMessageReceivedEvent(
+                                  userId: widget.userId,
+                                  otherId: widget.otherId,
+                                  message: message,
+                                ),
+                              ),
+                    ),
+                  ),
+                );
+          }
+        },
         builder: (context, state) {
           if (state is ChatLoadFailure) {
             return Center(
@@ -87,7 +103,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                 ],
               ),
             );
-          } else if (state is ChatLoadInProgress) {
+          } else if (state is ChatLoadInProgress || state is ChatInitialState) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -108,9 +124,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                         ChatMessageSendedEvent(
                           userId: widget.userId,
                           otherId: widget.otherId,
-                          actualMessages: state.messages,
                           message: partialText.text,
-                          historicalMessages: state.historicalMessages,
                         ),
                       );
                 },
@@ -147,5 +161,30 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
       }
     }
     return castedMessages;
+  }
+}
+
+class ChatEventHandler with sendbird.ChannelEventHandler {
+  final String userId;
+  final String otherId;
+  final void Function(sendbird.BaseMessage message) onMessageReceivedCallback;
+
+  ChatEventHandler({
+    required this.userId,
+    required this.otherId,
+    required this.onMessageReceivedCallback,
+  });
+
+  bool isForChat(sendbird.GroupChannel chat) {
+    MessagingRepository repository = GetIt.I();
+    return chat.channelUrl == repository.buildPrivateChatUrl(userId, otherId);
+  }
+
+  @override
+  void onMessageReceived(
+      sendbird.BaseChannel channel, sendbird.BaseMessage message) {
+    if (channel is sendbird.GroupChannel && isForChat(channel)) {
+      onMessageReceivedCallback(message);
+    }
   }
 }

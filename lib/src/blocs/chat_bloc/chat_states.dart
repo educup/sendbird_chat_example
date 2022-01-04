@@ -2,15 +2,15 @@ import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 class ChatState {}
 
+class ChatInitialState extends ChatState {}
+
 class ChatLoadInProgress extends ChatState {}
 
 class ChatLoadSuccess extends ChatState {
   final List<BaseMessage> messages;
-  final PreviousMessageListQuery historicalMessages;
 
   ChatLoadSuccess({
     required this.messages,
-    required this.historicalMessages,
   });
 }
 

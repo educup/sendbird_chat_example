@@ -11,9 +11,12 @@ class ChatEvent {
 }
 
 class ChatStartedEvent extends ChatEvent {
+  final ChannelEventHandler channelHandler;
+
   ChatStartedEvent({
     required String userId,
     required String otherId,
+    required this.channelHandler,
   }) : super(
           userId: userId,
           otherId: otherId,
@@ -21,14 +24,9 @@ class ChatStartedEvent extends ChatEvent {
 }
 
 class ChatHistoricalMessagesLoadedEvent extends ChatEvent {
-  final List<BaseMessage> actualMessages;
-  final PreviousMessageListQuery historicalMessages;
-
   ChatHistoricalMessagesLoadedEvent({
     required String userId,
     required String otherId,
-    required this.actualMessages,
-    required this.historicalMessages,
   }) : super(
           userId: userId,
           otherId: otherId,
@@ -37,15 +35,24 @@ class ChatHistoricalMessagesLoadedEvent extends ChatEvent {
 
 class ChatMessageSendedEvent extends ChatEvent {
   final String message;
-  final List<BaseMessage> actualMessages;
-  final PreviousMessageListQuery historicalMessages;
 
   ChatMessageSendedEvent({
     required String userId,
     required String otherId,
     required this.message,
-    required this.actualMessages,
-    required this.historicalMessages,
+  }) : super(
+          userId: userId,
+          otherId: otherId,
+        );
+}
+
+class ChatMessageReceivedEvent extends ChatEvent {
+  final BaseMessage message;
+
+  ChatMessageReceivedEvent({
+    required String userId,
+    required String otherId,
+    required this.message,
   }) : super(
           userId: userId,
           otherId: otherId,

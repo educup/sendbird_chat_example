@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:sendbird_chat_test/src/blocs/chat_bloc/chat_events.dart';
 import 'package:sendbird_chat_test/src/blocs/chat_bloc/chat_states.dart';
 import 'package:sendbird_chat_test/src/repositories/repositories.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 export 'chat_events.dart';
 export 'chat_states.dart';
@@ -10,22 +11,32 @@ export 'chat_states.dart';
 @injectable
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final MessagingRepository messagingRepository;
+  final List<BaseMessage> messages = [];
+  late final PreviousMessageListQuery historicalMessages;
 
   ChatBloc({
     required this.messagingRepository,
-  }) : super(ChatLoadInProgress()) {
+  }) : super(ChatInitialState()) {
     on<ChatStartedEvent>((event, emit) async {
       emit(ChatLoadInProgress());
       try {
-        final historicalMessages = messagingRepository.getHistoricalMessages(
+        historicalMessages = messagingRepository.getHistoricalMessages(
           event.userId,
           event.otherId,
         );
-        final actualMessages = await historicalMessages.loadNext();
+        final oldMessages = await historicalMessages.loadNext();
+        messages.addAll(oldMessages);
+
+        final handlerId = messagingRepository.buildPrivateChatUrl(
+            event.userId, event.otherId);
+        messagingRepository.removeChannelEventHandler(handlerId);
+        messagingRepository.registerChannelEventHandler(
+          event.channelHandler,
+          handlerId,
+        );
 
         emit(ChatLoadSuccess(
-          messages: actualMessages,
-          historicalMessages: historicalMessages,
+          messages: messages,
         ));
       } catch (e) {
         emit(ChatLoadFailure(
@@ -35,15 +46,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     });
     on<ChatHistoricalMessagesLoadedEvent>((event, emit) async {
       try {
-        final messages = event.actualMessages;
-        final historicalMessages = event.historicalMessages;
-
         final newHistoricalMessages = await historicalMessages.loadNext();
         messages.addAll(newHistoricalMessages);
 
         emit(ChatLoadSuccess(
           messages: messages,
-          historicalMessages: historicalMessages,
         ));
       } catch (e) {
         emit(ChatLoadFailure(
@@ -54,9 +61,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     on<ChatMessageSendedEvent>((event, emit) async {
       try {
-        final messages = event.actualMessages;
-        final historicalMessages = event.historicalMessages;
-
         final pv = await messagingRepository.getPrivateChat(
           event.userId,
           event.otherId,
@@ -69,7 +73,20 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
         emit(ChatLoadSuccess(
           messages: messages,
-          historicalMessages: historicalMessages,
+        ));
+      } catch (e) {
+        emit(ChatLoadFailure(
+          errorMessage: e.toString(),
+        ));
+      }
+    });
+
+    on<ChatMessageReceivedEvent>((event, emit) async {
+      try {
+        messages.insert(0, event.message);
+
+        emit(ChatLoadSuccess(
+          messages: messages,
         ));
       } catch (e) {
         emit(ChatLoadFailure(

@@ -21,7 +21,7 @@ class MessagingRepository {
     String userId1,
     String userId2,
   ) {
-    final pvUrl = _buildPrivateChatUrl(userId1, userId2);
+    final pvUrl = buildPrivateChatUrl(userId1, userId2);
     final params = GroupChannelParams()
       ..channelUrl = pvUrl
       ..userIds = [userId1, userId2]
@@ -33,7 +33,7 @@ class MessagingRepository {
     String userId1,
     String userId2,
   ) {
-    final pvUrl = _buildPrivateChatUrl(userId1, userId2);
+    final pvUrl = buildPrivateChatUrl(userId1, userId2);
     return GroupChannel.getChannel(pvUrl);
   }
 
@@ -60,7 +60,7 @@ class MessagingRepository {
     return premessage;
   }
 
-  String _buildPrivateChatUrl(
+  String buildPrivateChatUrl(
     String id1,
     String id2,
   ) {
@@ -85,7 +85,7 @@ class MessagingRepository {
     int limit = 30,
     bool reverse = true,
   }) {
-    final channelUrl = _buildPrivateChatUrl(userId1, userId2);
+    final channelUrl = buildPrivateChatUrl(userId1, userId2);
     final messagesQuery = PreviousMessageListQuery(
       channelType: ChannelType.group,
       channelUrl: channelUrl,
@@ -95,5 +95,14 @@ class MessagingRepository {
       ..includeReplies = true
       ..includeParentMessageInfo = true;
     return messagesQuery;
+  }
+
+  void registerChannelEventHandler(
+      ChannelEventHandler handler, String handlerId) {
+    sendbirdSdk.addChannelEventHandler(handlerId, handler);
+  }
+
+  void removeChannelEventHandler(String handlerId) {
+    sendbirdSdk.removeChannelEventHandler(handlerId);
   }
 }
