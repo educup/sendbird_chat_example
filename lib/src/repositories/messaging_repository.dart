@@ -37,6 +37,7 @@ class MessagingRepository {
     return GroupChannel.getChannel(pvUrl);
   }
 
+  //TODO: Update getPrivateChats to work like historical messages
   Future<List<GroupChannel>> getPrivateChats(
     String userId,
   ) {
@@ -64,5 +65,23 @@ class MessagingRepository {
     String id2,
   ) {
     return 'pv-$id1-$id2';
+  }
+
+  PreviousMessageListQuery getHistoricalMessages(
+    String userId1,
+    String userId2, {
+    int limit = 30,
+    bool reverse = true,
+  }) {
+    final channelUrl = _buildPrivateChatUrl(userId1, userId2);
+    final messagesQuery = PreviousMessageListQuery(
+      channelType: ChannelType.group,
+      channelUrl: channelUrl,
+    )
+      ..limit = limit
+      ..reverse = reverse
+      ..includeReplies = true
+      ..includeParentMessageInfo = true;
+    return messagesQuery;
   }
 }
