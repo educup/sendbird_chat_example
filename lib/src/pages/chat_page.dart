@@ -71,7 +71,8 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
         title: Text(widget.otherId),
       ),
       body: BlocConsumer<ChatBloc, ChatState>(
-        listener: (context, state) {
+        listener: (context, state) {},
+        builder: (context, state) {
           if (state is ChatInitialState) {
             context.read<ChatBloc>().add(
                   ChatStartedEvent(
@@ -91,10 +92,15 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                     ),
                   ),
                 );
-          }
-        },
-        builder: (context, state) {
-          if (state is ChatLoadFailure) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  CircularProgressIndicator(),
+                ],
+              ),
+            );
+          } else if (state is ChatLoadFailure) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -103,7 +109,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                 ],
               ),
             );
-          } else if (state is ChatLoadInProgress || state is ChatInitialState) {
+          } else if (state is ChatLoadInProgress) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
