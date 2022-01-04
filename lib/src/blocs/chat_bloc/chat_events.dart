@@ -10,8 +10,8 @@ class ChatEvent {
   });
 }
 
-class ChatEventStarted extends ChatEvent {
-  ChatEventStarted({
+class ChatStartedEvent extends ChatEvent {
+  ChatStartedEvent({
     required String userId,
     required String otherId,
   }) : super(
@@ -20,11 +20,11 @@ class ChatEventStarted extends ChatEvent {
         );
 }
 
-class ChatEventHistoricalMessagesLoaded extends ChatEvent {
+class ChatHistoricalMessagesLoadedEvent extends ChatEvent {
   final List<BaseMessage> actualMessages;
   final PreviousMessageListQuery historicalMessages;
 
-  ChatEventHistoricalMessagesLoaded({
+  ChatHistoricalMessagesLoadedEvent({
     required String userId,
     required String otherId,
     required this.actualMessages,
@@ -35,12 +35,12 @@ class ChatEventHistoricalMessagesLoaded extends ChatEvent {
         );
 }
 
-class ChatEventMessageSended extends ChatEvent {
+class ChatMessageSendedEvent extends ChatEvent {
   final String message;
   final List<BaseMessage> actualMessages;
   final PreviousMessageListQuery historicalMessages;
 
-  ChatEventMessageSended({
+  ChatMessageSendedEvent({
     required String userId,
     required String otherId,
     required this.message,

@@ -1,8 +1,11 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:get_it/get_it.dart';
 import 'package:sendbird_chat_test/src/blocs/blocs.dart';
+import 'package:sendbird_sdk/sendbird_sdk.dart' as sendbird;
 
 class ChatPage extends StatelessWidget {
   final String userId;
@@ -38,7 +41,7 @@ class ChatPage extends StatelessWidget {
     return BlocProvider<ChatBloc>(
       create: (context) => GetIt.I()
         ..add(
-          ChatEventStarted(
+          ChatStartedEvent(
             userId: userId,
             otherId: otherId,
           ),
@@ -93,10 +96,56 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                 ],
               ),
             );
+          } else if (state is ChatLoadSuccess) {
+            return SafeArea(
+              bottom: false,
+              child: Chat(
+                messages: _buildChatViewMessages(
+                  state.messages,
+                ),
+                onSendPressed: (partialText) {
+                  context.read<ChatBloc>().add(
+                        ChatMessageSendedEvent(
+                          userId: widget.userId,
+                          otherId: widget.otherId,
+                          actualMessages: state.messages,
+                          message: partialText.text,
+                          historicalMessages: state.historicalMessages,
+                        ),
+                      );
+                },
+                user: types.User(id: widget.userId),
+              ),
+            );
           }
           return Container();
         },
       ),
     );
+  }
+
+  List<types.Message> _buildChatViewMessages(
+      List<sendbird.BaseMessage> messages) {
+    final List<types.Message> castedMessages = [];
+    final result = messages.map(
+      (message) {
+        if (message is sendbird.UserMessage) {
+          return types.TextMessage(
+            id: message.messageId.toString(),
+            author: types.User(
+              id: message.sender!.userId,
+            ),
+            text: message.message,
+          );
+        }
+        return null;
+      },
+    ).toList();
+    for (final castedMessage in result) {
+      if (castedMessage != null) {
+        castedMessages.add(castedMessage);
+      }
+    }
+    return castedMessages;
   }
 }

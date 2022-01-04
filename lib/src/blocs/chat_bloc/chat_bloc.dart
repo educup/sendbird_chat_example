@@ -14,7 +14,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ChatBloc({
     required this.messagingRepository,
   }) : super(ChatLoadInProgress()) {
-    on<ChatEventStarted>((event, emit) async {
+    on<ChatStartedEvent>((event, emit) async {
       emit(ChatLoadInProgress());
       try {
         final historicalMessages = messagingRepository.getHistoricalMessages(
@@ -33,7 +33,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ));
       }
     });
-    on<ChatEventHistoricalMessagesLoaded>((event, emit) async {
+    on<ChatHistoricalMessagesLoadedEvent>((event, emit) async {
       try {
         final messages = event.actualMessages;
         final historicalMessages = event.historicalMessages;
@@ -52,7 +52,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
     });
 
-    on<ChatEventMessageSended>((event, emit) async {
+    on<ChatMessageSendedEvent>((event, emit) async {
       try {
         final messages = event.actualMessages;
         final historicalMessages = event.historicalMessages;
@@ -65,7 +65,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           pv,
           event.message,
         );
-        messages.add(message);
+        messages.insert(0, message);
 
         emit(ChatLoadSuccess(
           messages: messages,

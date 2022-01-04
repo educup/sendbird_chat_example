@@ -1,9 +1,10 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:sendbird_chat_test/src/pages/pages.dart';
 import 'package:sendbird_chat_test/src/router/locations/locations_utils.dart';
 
-// ignore: constant_identifier_names
 const String USER_ID = 'user_id';
 const String OTHER_ID = 'other_id';
 
