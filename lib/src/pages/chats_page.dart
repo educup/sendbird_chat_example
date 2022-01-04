@@ -141,7 +141,9 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () {},
+            onTap: () {
+              context.beamToNamed('/${widget.userId}/chats/$chatCompanionId');
+            },
             child: Card(
               margin: const EdgeInsets.symmetric(
                 vertical: 5,
