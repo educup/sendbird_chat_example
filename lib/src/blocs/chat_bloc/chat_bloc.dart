@@ -36,6 +36,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         );
 
         emit(ChatLoadSuccess(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
           messages: messages,
         ));
       } catch (e) {
@@ -46,10 +48,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     });
     on<ChatHistoricalMessagesLoadedEvent>((event, emit) async {
       try {
-        final newHistoricalMessages = await historicalMessages.loadNext();
-        messages.addAll(newHistoricalMessages);
-
+        if (!historicalMessages.loading && historicalMessages.hasNext) {
+          final newHistoricalMessages = await historicalMessages.loadNext();
+          messages.addAll(newHistoricalMessages);
+        }
         emit(ChatLoadSuccess(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
           messages: messages,
         ));
       } catch (e) {
@@ -72,6 +77,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messages.insert(0, message);
 
         emit(ChatLoadSuccess(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
           messages: messages,
         ));
       } catch (e) {
@@ -95,6 +102,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messages.insert(0, message);
 
         emit(ChatLoadSuccess(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
           messages: messages,
         ));
       } catch (e) {
@@ -109,6 +118,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messages.insert(0, event.message);
 
         emit(ChatLoadSuccess(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
           messages: messages,
         ));
       } catch (e) {

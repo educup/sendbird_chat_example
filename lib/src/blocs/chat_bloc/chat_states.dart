@@ -7,9 +7,13 @@ class ChatInitialState extends ChatState {}
 class ChatLoadInProgress extends ChatState {}
 
 class ChatLoadSuccess extends ChatState {
+  final bool loading;
+  final bool allLoaded;
   final List<BaseMessage> messages;
 
   ChatLoadSuccess({
+    required this.loading,
+    required this.allLoaded,
     required this.messages,
   });
 }

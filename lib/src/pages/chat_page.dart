@@ -124,21 +124,27 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
           } else if (state is ChatLoadSuccess) {
             return SafeArea(
               bottom: false,
-              child: Chat(
-                messages: _buildChatViewMessages(
-                  state.messages,
-                ),
-                onSendPressed: _handleSendPressed,
-                onAttachmentPressed: _handleAttachmentPressed,
-                user: types.User(
-                  id: widget.userId,
-                  firstName: widget.userId,
-                ),
-              ),
+              child: _buildChat(state),
             );
           }
           return Container();
         },
+      ),
+    );
+  }
+
+  Widget _buildChat(ChatLoadSuccess state) {
+    return Chat(
+      messages: _buildChatViewMessages(
+        state.messages,
+      ),
+      onEndReached:
+          (!state.allLoaded && !state.loading) ? _handleEndReached : null,
+      onSendPressed: _handleSendPressed,
+      onAttachmentPressed: _handleAttachmentPressed,
+      user: types.User(
+        id: widget.userId,
+        firstName: widget.userId,
       ),
     );
   }
@@ -207,6 +213,15 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
       }
     }
     return castedMessages;
+  }
+
+  Future<void> _handleEndReached() async {
+    context.read<ChatBloc>().add(
+          ChatHistoricalMessagesLoadedEvent(
+            userId: widget.userId,
+            otherId: widget.otherId,
+          ),
+        );
   }
 }
 
