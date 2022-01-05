@@ -2,6 +2,7 @@ import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:sendbird_chat_test/src/blocs/blocs.dart';
 import 'package:sendbird_chat_test/src/pages/new_chat_page.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
@@ -211,12 +212,22 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Text(
-                              chatCompanionId,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  chatCompanionId,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                if (chat.lastMessage != null)
+                                  Text(_getDateText(chat.lastMessage!)),
+                              ],
                             ),
                             const SizedBox(
                               height: 10,
@@ -237,15 +248,19 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
                                 ),
                                 if (chat.unreadMessageCount > 0)
                                   Container(
-                                    height: 31,
+                                    height: 30,
+                                    width:
+                                        '${chat.unreadMessageCount}'.length > 3
+                                            ? null
+                                            : 30,
                                     decoration: BoxDecoration(
                                       color: Colors.blue,
                                       borderRadius: BorderRadius.circular(100),
                                     ),
                                     child: Center(
                                       child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 3,
+                                        margin: const EdgeInsets.all(
+                                          3,
                                         ),
                                         child: Text(
                                           chat.unreadMessageCount.toString(),
@@ -270,5 +285,14 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
         ),
       ],
     );
+  }
+
+  String _getDateText(BaseMessage lastMessage) {
+    final date = DateTime.fromMillisecondsSinceEpoch(lastMessage.createdAt);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (date.isBefore(today)) return DateFormat.yMd().format(date);
+    return DateFormat.Hm().format(date);
   }
 }
