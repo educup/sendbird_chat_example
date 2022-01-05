@@ -89,7 +89,20 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
           event.userId,
           event.otherId,
         );
+
+        int? originalPos;
+        int pos = 0;
+        for (final chat in chats) {
+          if (newChat.channelUrl == chat.channelUrl) {
+            originalPos = pos;
+          }
+          pos += 1;
+        }
+        if (originalPos != null) {
+          chats.removeAt(originalPos);
+        }
         chats.insert(0, newChat);
+
         emit(
           ChatsListLoadSuccess(
             loading: chatsQuery.loading,
