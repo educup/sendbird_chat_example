@@ -130,7 +130,7 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          for (final chat in state.chats) buildChatPreview(chat),
+          for (final chat in state.chats) _buildChatPreview(chat),
         ],
       ),
     );
@@ -158,14 +158,18 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
     );
   }
 
-  Widget buildChatPreview(GroupChannel chat) {
-    String chatCompanionId = 'Someone';
+  Widget _buildChatPreview(GroupChannel chat) {
+    String? chatCompanionId;
     for (final member in chat.members) {
       if (member.userId != widget.userId) {
         chatCompanionId = member.userId;
         break;
       }
     }
+
+    if (chatCompanionId == null) return Container();
+
+    double previewWidth = MediaQuery.of(context).size.width - 20;
 
     return Row(
       children: [
@@ -176,13 +180,90 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
             },
             child: Card(
               margin: const EdgeInsets.symmetric(
-                vertical: 5,
-                horizontal: 5,
+                vertical: 8,
+                horizontal: 10,
               ),
               child: Container(
-                height: 100,
+                height: 70,
                 margin: const EdgeInsets.all(5),
-                child: Text('Chat with $chatCompanionId'),
+                child: SizedBox(
+                  width: previewWidth,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 70,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: chat.coverUrl != null
+                              ? Image.network(chat.coverUrl!)
+                              : Image.asset('default_channel_image.png'),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          mainAxisSize: MainAxisSize.max,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              chatCompanionId,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    chat.lastMessage?.message ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                if (chat.unreadMessageCount > 0)
+                                  Container(
+                                    height: 31,
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                    child: Center(
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 3,
+                                        ),
+                                        child: Text(
+                                          chat.unreadMessageCount.toString(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

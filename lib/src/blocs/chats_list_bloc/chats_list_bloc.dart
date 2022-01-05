@@ -3,7 +3,6 @@ import 'package:injectable/injectable.dart';
 import 'package:sendbird_chat_test/src/blocs/chats_list_bloc/chats_list_events.dart';
 import 'package:sendbird_chat_test/src/blocs/chats_list_bloc/chats_list_states.dart';
 import 'package:sendbird_chat_test/src/repositories/messaging_repository.dart';
-import 'package:sendbird_sdk/core/channel/group/group_channel.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart';
 
 export 'chats_list_events.dart';
