@@ -30,12 +30,7 @@ class ChatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ChatsListBloc>(
-      create: (context) => GetIt.I()
-        ..add(
-          ChatsListStarted(
-            userId: userId,
-          ),
-        ),
+      create: (context) => GetIt.I(),
       child: ChatsPageWidget(
         userId: userId,
       ),
@@ -74,56 +69,91 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
           if (result != null && result.isNotEmpty) {
             context.read<ChatsListBloc>().add(
                   ChatsListNewChatPressed(
-                      userId: widget.userId, otherUserId: result),
+                      userId: widget.userId, otherId: result),
                 );
           }
         },
       ),
       body: BlocConsumer<ChatsListBloc, ChatsListState>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          if (state is ChatsListLoadFailure) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: ${state.message}'),
-                ],
-              ),
-            );
-          } else if (state is ChatsListLoadSuccess) {
-            if (state.chats.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text('No chats found'),
-                  ],
+        listener: (context, state) {
+          if (state is ChatsListLoadSuccessWithNotification) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.notification),
+                action: SnackBarAction(
+                  label: 'Close',
+                  onPressed: () {},
                 ),
-              );
-            } else {
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    for (final chat in state.chats) buildChatPreview(chat),
-                  ],
-                ),
-              );
-            }
-          } else if (state is ChatsListLoadInProgress) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                ],
               ),
             );
           }
+        },
+        builder: (context, state) {
+          if (state is ChatsListInitialState) {
+            context.read<ChatsListBloc>().add(
+                  ChatsListStarted(
+                    userId: widget.userId,
+                  ),
+                );
+            return _buildLoading();
+          } else if (state is ChatsListLoadFailure) {
+            return _buildError(state);
+          } else if (state is ChatsListLoadSuccess) {
+            if (state.chats.isEmpty) {
+              return _buildEmptyChatsList();
+            } else {
+              return _buildChatsList(state);
+            }
+          } else if (state is ChatsListLoadInProgress) {
+            return _buildLoading();
+          }
           return Container();
         },
+      ),
+    );
+  }
+
+  Widget _buildError(ChatsListLoadFailure state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Error: ${state.errorMessage}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChatsList(ChatsListLoadSuccess state) {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (final chat in state.chats) buildChatPreview(chat),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyChatsList() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Text('No chats found'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator(),
+        ],
       ),
     );
   }

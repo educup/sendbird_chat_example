@@ -1,27 +1,41 @@
-class ChatsListEvent {}
+class ChatsListEvent {
+  final String userId;
+
+  ChatsListEvent({
+    required this.userId,
+  });
+}
 
 class ChatsListStarted extends ChatsListEvent {
   ChatsListStarted({
-    required this.userId,
-  });
-
-  String userId;
+    required String userId,
+  }) : super(
+          userId: userId,
+        );
 }
 
 class ChatsListRefreshed extends ChatsListEvent {
   ChatsListRefreshed({
-    required this.userId,
-  });
+    required String userId,
+  }) : super(
+          userId: userId,
+        );
+}
 
-  String userId;
+class ChatsListMoreChatsLoaded extends ChatsListEvent {
+  ChatsListMoreChatsLoaded({
+    required String userId,
+  }) : super(
+          userId: userId,
+        );
 }
 
 class ChatsListNewChatPressed extends ChatsListEvent {
+  final String otherId;
   ChatsListNewChatPressed({
-    required this.userId,
-    required this.otherUserId,
-  });
-
-  String userId;
-  String otherUserId;
+    required String userId,
+    required this.otherId,
+  }) : super(
+          userId: userId,
+        );
 }

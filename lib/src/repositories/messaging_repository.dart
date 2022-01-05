@@ -38,14 +38,15 @@ class MessagingRepository {
     return GroupChannel.getChannel(pvUrl);
   }
 
-  //TODO: Update getPrivateChats to work like historical messages
-  Future<List<GroupChannel>> getPrivateChats(
-    String userId,
-  ) {
+  GroupChannelListQuery getPrivateChats(
+    String userId, {
+    int limit = 30,
+  }) {
     final query = GroupChannelListQuery()
-      ..userIdsIncludeIn = [userId]
+      ..includeEmptyChannel = true
+      ..limit = limit
       ..order = GroupChannelListOrder.latestLastMessage;
-    return query.loadNext();
+    return query;
   }
 
   Future<UserMessage> sendMessage(
