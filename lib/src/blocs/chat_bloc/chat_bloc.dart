@@ -58,8 +58,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages: messages,
         ));
       } catch (e) {
-        emit(ChatLoadFailure(
-          errorMessage: e.toString(),
+        emit(ChatLoadSuccessWithNotification(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
+          messages: messages,
+          notification: e.toString(),
         ));
       }
     });
@@ -82,8 +85,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages: messages,
         ));
       } catch (e) {
-        emit(ChatLoadFailure(
-          errorMessage: e.toString(),
+        emit(ChatLoadSuccessWithNotification(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
+          messages: messages,
+          notification: e.toString(),
         ));
       }
     });
@@ -107,8 +113,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages: messages,
         ));
       } catch (e) {
-        emit(ChatLoadFailure(
-          errorMessage: e.toString(),
+        emit(ChatLoadSuccessWithNotification(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
+          messages: messages,
+          notification: e.toString(),
         ));
       }
     });
@@ -123,8 +132,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages: messages,
         ));
       } catch (e) {
-        emit(ChatLoadFailure(
-          errorMessage: e.toString(),
+        emit(ChatLoadSuccessWithNotification(
+          loading: historicalMessages.loading,
+          allLoaded: !historicalMessages.hasNext,
+          messages: messages,
+          notification: e.toString(),
         ));
       }
     });

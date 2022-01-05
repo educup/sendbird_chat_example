@@ -74,7 +74,19 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
         title: Text(widget.otherId),
       ),
       body: BlocConsumer<ChatBloc, ChatState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is ChatLoadSuccessWithNotification) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.notification),
+                action: SnackBarAction(
+                  label: 'Close',
+                  onPressed: () {},
+                ),
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           if (state is ChatInitialState) {
             context.read<ChatBloc>().add(
@@ -95,37 +107,13 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                     ),
                   ),
                 );
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                ],
-              ),
-            );
+            return _buildFullLoading();
           } else if (state is ChatLoadFailure) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: ${state.errorMessage}'),
-                ],
-              ),
-            );
+            return _buildFullError(state);
           } else if (state is ChatLoadInProgress) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                ],
-              ),
-            );
+            return _buildFullLoading();
           } else if (state is ChatLoadSuccess) {
-            return SafeArea(
-              bottom: false,
-              child: _buildChat(state),
-            );
+            return _buildChat(state);
           }
           return Container();
         },
@@ -133,49 +121,45 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
     );
   }
 
+  Widget _buildFullError(ChatLoadFailure state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Error: ${state.errorMessage}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFullLoading() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildChat(ChatLoadSuccess state) {
-    return Chat(
-      messages: _buildChatViewMessages(
-        state.messages,
-      ),
-      onEndReached:
-          (!state.allLoaded && !state.loading) ? _handleEndReached : null,
-      onSendPressed: _handleSendPressed,
-      onAttachmentPressed: _handleAttachmentPressed,
-      user: types.User(
-        id: widget.userId,
-        firstName: widget.userId,
+    return SafeArea(
+      bottom: false,
+      child: Chat(
+        messages: _buildChatViewMessages(
+          state.messages,
+        ),
+        onEndReached:
+            (!state.allLoaded && !state.loading) ? _handleEndReached : null,
+        onSendPressed: _handleSendPressed,
+        onAttachmentPressed: _handleAttachmentPressed,
+        user: types.User(
+          id: widget.userId,
+          firstName: widget.userId,
+        ),
       ),
     );
-  }
-
-  void _handleSendPressed(types.PartialText partialText) {
-    context.read<ChatBloc>().add(
-          ChatTextMessageSendedEvent(
-            userId: widget.userId,
-            otherId: widget.otherId,
-            message: partialText.text,
-          ),
-        );
-  }
-
-  void _handleAttachmentPressed() async {
-    final image = await ImagePicker().pickImage(
-      imageQuality: 70,
-      maxWidth: 1440,
-      source: ImageSource.gallery,
-    );
-
-    if (image != null) {
-      context.read<ChatBloc>().add(
-            ChatFileMessageSendedEvent(
-              userId: widget.userId,
-              otherId: widget.otherId,
-              filename: image.name,
-              file: File(image.path),
-            ),
-          );
-    }
   }
 
   List<types.Message> _buildChatViewMessages(
@@ -213,6 +197,37 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
       }
     }
     return castedMessages;
+  }
+
+  // Chat handlers
+
+  void _handleSendPressed(types.PartialText partialText) {
+    context.read<ChatBloc>().add(
+          ChatTextMessageSendedEvent(
+            userId: widget.userId,
+            otherId: widget.otherId,
+            message: partialText.text,
+          ),
+        );
+  }
+
+  void _handleAttachmentPressed() async {
+    final image = await ImagePicker().pickImage(
+      imageQuality: 70,
+      maxWidth: 1440,
+      source: ImageSource.gallery,
+    );
+
+    if (image != null) {
+      context.read<ChatBloc>().add(
+            ChatFileMessageSendedEvent(
+              userId: widget.userId,
+              otherId: widget.otherId,
+              filename: image.name,
+              file: File(image.path),
+            ),
+          );
+    }
   }
 
   Future<void> _handleEndReached() async {

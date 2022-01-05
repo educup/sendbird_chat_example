@@ -18,6 +18,21 @@ class ChatLoadSuccess extends ChatState {
   });
 }
 
+class ChatLoadSuccessWithNotification extends ChatLoadSuccess {
+  final String notification;
+
+  ChatLoadSuccessWithNotification({
+    required bool loading,
+    required bool allLoaded,
+    required List<BaseMessage> messages,
+    required this.notification,
+  }) : super(
+          loading: loading,
+          allLoaded: allLoaded,
+          messages: messages,
+        );
+}
+
 class ChatLoadFailure extends ChatState {
   final String errorMessage;
 
