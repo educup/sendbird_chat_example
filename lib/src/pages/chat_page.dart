@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:beamer/beamer.dart';
@@ -93,18 +94,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                   ChatStartedEvent(
                     userId: widget.userId,
                     otherId: widget.otherId,
-                    channelHandler: ChatEventHandler(
-                      userId: widget.userId,
-                      otherId: widget.otherId,
-                      onMessageReceivedCallback: (message) =>
-                          context.read<ChatBloc>().add(
-                                ChatMessageReceivedEvent(
-                                  userId: widget.userId,
-                                  otherId: widget.otherId,
-                                  message: message,
-                                ),
-                              ),
-                    ),
                   ),
                 );
             return _buildFullLoading();
@@ -204,8 +193,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
   void _handleSendPressed(types.PartialText partialText) {
     context.read<ChatBloc>().add(
           ChatTextMessageSendedEvent(
-            userId: widget.userId,
-            otherId: widget.otherId,
             message: partialText.text,
           ),
         );
@@ -221,8 +208,6 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
     if (image != null) {
       context.read<ChatBloc>().add(
             ChatFileMessageSendedEvent(
-              userId: widget.userId,
-              otherId: widget.otherId,
               filename: image.name,
               file: File(image.path),
             ),
@@ -232,35 +217,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
 
   Future<void> _handleEndReached() async {
     context.read<ChatBloc>().add(
-          ChatHistoricalMessagesLoadedEvent(
-            userId: widget.userId,
-            otherId: widget.otherId,
-          ),
+          ChatHistoricalMessagesLoadedEvent(),
         );
-  }
-}
-
-class ChatEventHandler with sendbird.ChannelEventHandler {
-  final String userId;
-  final String otherId;
-  final void Function(sendbird.BaseMessage message) onMessageReceivedCallback;
-
-  ChatEventHandler({
-    required this.userId,
-    required this.otherId,
-    required this.onMessageReceivedCallback,
-  });
-
-  bool isForChat(sendbird.GroupChannel chat) {
-    MessagingRepository repository = GetIt.I();
-    return chat.channelUrl == repository.buildPrivateChatUrl(userId, otherId);
-  }
-
-  @override
-  void onMessageReceived(
-      sendbird.BaseChannel channel, sendbird.BaseMessage message) {
-    if (channel is sendbird.GroupChannel && isForChat(channel)) {
-      onMessageReceivedCallback(message);
-    }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sendbird_chat_test/src/blocs/chat_bloc/chat_events.dart';
@@ -10,6 +11,8 @@ export 'chat_states.dart';
 
 @injectable
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
+  late final String userId;
+  late final String otherId;
   final MessagingRepository messagingRepository;
   final List<BaseMessage> messages = [];
   late final PreviousMessageListQuery historicalMessages;
@@ -20,6 +23,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatStartedEvent>((event, emit) async {
       emit(ChatLoadInProgress());
       try {
+        userId = event.userId;
+        otherId = event.otherId;
         historicalMessages = messagingRepository.getHistoricalMessages(
           event.userId,
           event.otherId,
@@ -31,7 +36,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             event.userId, event.otherId);
         messagingRepository.removeChannelEventHandler(handlerId);
         messagingRepository.registerChannelEventHandler(
-          event.channelHandler,
+          ChatEventHandler(
+            userId: userId,
+            otherId: otherId,
+            bloc: this,
+          ),
           handlerId,
         );
 
@@ -70,8 +79,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatTextMessageSendedEvent>((event, emit) async {
       try {
         final pv = await messagingRepository.getPrivateChat(
-          event.userId,
-          event.otherId,
+          userId,
+          otherId,
         );
         final message = await messagingRepository.sendMessage(
           pv,
@@ -97,8 +106,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatFileMessageSendedEvent>((event, emit) async {
       try {
         final pv = await messagingRepository.getPrivateChat(
-          event.userId,
-          event.otherId,
+          userId,
+          otherId,
         );
         final message = await messagingRepository.sendFile(
           pv,
@@ -140,5 +149,36 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ));
       }
     });
+  }
+}
+
+class ChatEventHandler with ChannelEventHandler {
+  final String userId;
+  final String otherId;
+  final ChatBloc bloc;
+
+  ChatEventHandler({
+    required this.userId,
+    required this.otherId,
+    required this.bloc,
+  });
+
+  bool isForChat(GroupChannel chat) {
+    return chat.channelUrl ==
+        bloc.messagingRepository.buildPrivateChatUrl(userId, otherId);
+  }
+
+  @override
+  void onMessageReceived(
+    BaseChannel channel,
+    BaseMessage message,
+  ) {
+    if (channel is GroupChannel && isForChat(channel)) {
+      bloc.add(
+        ChatMessageReceivedEvent(
+          message: message,
+        ),
+      );
+    }
   }
 }
