@@ -10,8 +10,10 @@ export 'chats_list_states.dart';
 
 @injectable
 class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
+  late final String userId;
   List<GroupChannel> chats = [];
   late GroupChannelListQuery chatsQuery;
+  final MessagingRepository messagingRepository;
 
   ChatsListBloc({
     required this.messagingRepository,
@@ -19,8 +21,20 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
     on<ChatsListStarted>((event, emit) async {
       emit(ChatsListLoadInProgress());
       try {
-        await messagingRepository.connect(event.userId);
-        chatsQuery = messagingRepository.getPrivateChats(event.userId);
+        userId = event.userId;
+        await messagingRepository.connect(userId);
+
+        messagingRepository
+            .removeChannelEventHandler(ChatsListEventHandler.chatListHandlerId);
+        messagingRepository.registerChannelEventHandler(
+          ChatsListEventHandler(
+            userId: userId,
+            bloc: this,
+          ),
+          ChatsListEventHandler.chatListHandlerId,
+        );
+
+        chatsQuery = messagingRepository.getPrivateChats(userId);
         chats = await chatsQuery.loadNext();
         emit(
           ChatsListLoadSuccess(
@@ -40,7 +54,7 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
 
     on<ChatsListRefreshed>((event, emit) async {
       try {
-        chatsQuery = messagingRepository.getPrivateChats(event.userId);
+        chatsQuery = messagingRepository.getPrivateChats(userId);
         chats = await chatsQuery.loadNext();
         emit(
           ChatsListLoadSuccess(
@@ -85,7 +99,7 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
     on<ChatsListNewChatPressed>((event, emit) async {
       try {
         final newChat = await messagingRepository.createPrivateChat(
-          event.userId,
+          userId,
           event.otherId,
         );
 
@@ -120,7 +134,95 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
         );
       }
     });
+
+    on<ChatsListChatJoined>((event, emit) {
+      try {
+        chats.insert(0, event.chat);
+
+        emit(
+          ChatsListLoadSuccess(
+            loading: chatsQuery.loading,
+            allLoaded: !chatsQuery.hasNext,
+            chats: chats,
+          ),
+        );
+      } catch (e) {
+        emit(
+          ChatsListLoadSuccessWithNotification(
+            loading: chatsQuery.loading,
+            allLoaded: !chatsQuery.hasNext,
+            chats: chats,
+            notification: e.toString(),
+          ),
+        );
+      }
+    });
+
+    on<ChatsListMessageReceived>((event, emit) {
+      try {
+        int? originalPos;
+        int pos = 0;
+        for (final chat in chats) {
+          if (event.inChat.channelUrl == chat.channelUrl) {
+            originalPos = pos;
+          }
+          pos += 1;
+        }
+        if (originalPos != null) {
+          chats.removeAt(originalPos);
+        }
+        chats.insert(0, event.inChat);
+
+        emit(
+          ChatsListLoadSuccess(
+            loading: chatsQuery.loading,
+            allLoaded: !chatsQuery.hasNext,
+            chats: chats,
+          ),
+        );
+      } catch (e) {
+        emit(
+          ChatsListLoadSuccessWithNotification(
+            loading: chatsQuery.loading,
+            allLoaded: !chatsQuery.hasNext,
+            chats: chats,
+            notification: e.toString(),
+          ),
+        );
+      }
+    });
+  }
+}
+
+class ChatsListEventHandler with ChannelEventHandler {
+  final String userId;
+  final ChatsListBloc bloc;
+  static const String chatListHandlerId = 'chat-list-handler';
+
+  ChatsListEventHandler({
+    required this.userId,
+    required this.bloc,
+  });
+
+  @override
+  void onUserJoined(GroupChannel channel, User user) {
+    if (user.isCurrentUser) {
+      bloc.add(
+        ChatsListChatJoined(
+          chat: channel,
+        ),
+      );
+    }
   }
 
-  final MessagingRepository messagingRepository;
+  @override
+  void onMessageReceived(BaseChannel channel, BaseMessage message) {
+    if (channel is GroupChannel) {
+      bloc.add(
+        ChatsListMessageReceived(
+          inChat: channel,
+        ),
+      );
+    }
+  }
 }

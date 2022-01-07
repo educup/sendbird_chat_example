@@ -70,7 +70,8 @@ class _ChatsPageWidgetState extends State<ChatsPageWidget> {
           if (result != null && result.isNotEmpty) {
             context.read<ChatsListBloc>().add(
                   ChatsListNewChatPressed(
-                      userId: widget.userId, otherId: result),
+                    otherId: result,
+                  ),
                 );
           }
         },

@@ -1,41 +1,38 @@
-class ChatsListEvent {
+import 'package:sendbird_sdk/core/channel/group/group_channel.dart';
+
+class ChatsListEvent {}
+
+class ChatsListStarted extends ChatsListEvent {
   final String userId;
 
-  ChatsListEvent({
+  ChatsListStarted({
     required this.userId,
   });
 }
 
-class ChatsListStarted extends ChatsListEvent {
-  ChatsListStarted({
-    required String userId,
-  }) : super(
-          userId: userId,
-        );
-}
+class ChatsListRefreshed extends ChatsListEvent {}
 
-class ChatsListRefreshed extends ChatsListEvent {
-  ChatsListRefreshed({
-    required String userId,
-  }) : super(
-          userId: userId,
-        );
-}
-
-class ChatsListMoreChatsLoaded extends ChatsListEvent {
-  ChatsListMoreChatsLoaded({
-    required String userId,
-  }) : super(
-          userId: userId,
-        );
-}
+class ChatsListMoreChatsLoaded extends ChatsListEvent {}
 
 class ChatsListNewChatPressed extends ChatsListEvent {
   final String otherId;
   ChatsListNewChatPressed({
-    required String userId,
     required this.otherId,
-  }) : super(
-          userId: userId,
-        );
+  });
+}
+
+class ChatsListChatJoined extends ChatsListEvent {
+  final GroupChannel chat;
+
+  ChatsListChatJoined({
+    required this.chat,
+  });
+}
+
+class ChatsListMessageReceived extends ChatsListEvent {
+  final GroupChannel inChat;
+
+  ChatsListMessageReceived({
+    required this.inChat,
+  });
 }

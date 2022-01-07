@@ -156,17 +156,17 @@ class ChatEventHandler with ChannelEventHandler {
   final String userId;
   final String otherId;
   final ChatBloc bloc;
+  late final String chatUrl;
 
   ChatEventHandler({
     required this.userId,
     required this.otherId,
     required this.bloc,
-  });
-
-  bool isForChat(GroupChannel chat) {
-    return chat.channelUrl ==
-        bloc.messagingRepository.buildPrivateChatUrl(userId, otherId);
+  }) {
+    chatUrl = bloc.messagingRepository.buildPrivateChatUrl(userId, otherId);
   }
+
+  bool isForChat(GroupChannel chat) => chat.channelUrl == chatUrl;
 
   @override
   void onMessageReceived(
