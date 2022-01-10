@@ -191,6 +191,45 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
         );
       }
     });
+
+    on<ChatsListChatPressed>((event, emit) async {
+      try {
+        final toUpdateChatUrl = messagingRepository.buildPrivateChatUrl(
+            userId, event.chatCompanionId);
+
+        int? originalPos;
+        int pos = 0;
+        for (final chat in chats) {
+          if (toUpdateChatUrl == chat.channelUrl) {
+            originalPos = pos;
+          }
+          pos += 1;
+        }
+        final updatedChat =
+            await messagingRepository.getPrivateChatByUrl(toUpdateChatUrl);
+        await messagingRepository.markChannelAsReaded(updatedChat);
+        if (originalPos != null) {
+          chats[originalPos] = updatedChat;
+        }
+        emit(
+          ChatListChatPressSuccess(
+            loading: chatsQuery.loading,
+            allLoaded: !chatsQuery.hasNext,
+            chats: chats,
+            chatCompanionId: event.chatCompanionId,
+          ),
+        );
+      } catch (e) {
+        emit(
+          ChatsListLoadSuccessWithNotification(
+            loading: chatsQuery.loading,
+            allLoaded: !chatsQuery.hasNext,
+            chats: chats,
+            notification: e.toString(),
+          ),
+        );
+      }
+    });
   }
 }
 

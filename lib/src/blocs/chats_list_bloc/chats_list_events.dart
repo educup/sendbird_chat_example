@@ -36,3 +36,11 @@ class ChatsListMessageReceived extends ChatsListEvent {
     required this.inChat,
   });
 }
+
+class ChatsListChatPressed extends ChatsListEvent {
+  final String chatCompanionId;
+
+  ChatsListChatPressed({
+    required this.chatCompanionId,
+  });
+}

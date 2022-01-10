@@ -33,6 +33,21 @@ class ChatsListLoadSuccessWithNotification extends ChatsListLoadSuccess {
         );
 }
 
+class ChatListChatPressSuccess extends ChatsListLoadSuccess {
+  final String chatCompanionId;
+
+  ChatListChatPressSuccess({
+    required bool loading,
+    required bool allLoaded,
+    required List<GroupChannel> chats,
+    required this.chatCompanionId,
+  }) : super(
+          loading: loading,
+          allLoaded: allLoaded,
+          chats: chats,
+        );
+}
+
 class ChatsListLoadFailure extends ChatsListState {
   ChatsListLoadFailure({
     required this.errorMessage,
