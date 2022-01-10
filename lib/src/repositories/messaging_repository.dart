@@ -38,6 +38,10 @@ class MessagingRepository {
     return GroupChannel.getChannel(pvUrl);
   }
 
+  Future<GroupChannel> getPrivateChatByUrl(String chatUrl) {
+    return GroupChannel.getChannel(chatUrl);
+  }
+
   GroupChannelListQuery getPrivateChats(
     String userId, {
     int limit = 30,
@@ -122,5 +126,10 @@ class MessagingRepository {
 
   void removeChannelEventHandler(String handlerId) {
     sendbirdSdk.removeChannelEventHandler(handlerId);
+  }
+
+  Future<void> markChannelAsReaded(GroupChannel channel) async {
+    channel.markAsRead();
+    channel.unreadMessageCount = 0;
   }
 }
