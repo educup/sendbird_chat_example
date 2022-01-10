@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sendbird_chat_test/src/blocs/chat_bloc/chat_events.dart';
@@ -25,6 +24,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       try {
         userId = event.userId;
         otherId = event.otherId;
+
         historicalMessages = messagingRepository.getHistoricalMessages(
           event.userId,
           event.otherId,
@@ -133,6 +133,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     on<ChatMessageReceivedEvent>((event, emit) async {
       try {
+        final chat = await messagingRepository.getPrivateChat(userId, otherId);
+        await messagingRepository.markChannelAsReaded(chat);
+
         messages.insert(0, event.message);
 
         emit(ChatLoadSuccess(
