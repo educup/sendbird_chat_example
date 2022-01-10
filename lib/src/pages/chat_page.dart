@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:beamer/beamer.dart';
@@ -9,7 +8,6 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sendbird_chat_test/src/blocs/blocs.dart';
-import 'package:sendbird_chat_test/src/repositories/messaging_repository.dart';
 import 'package:sendbird_sdk/sendbird_sdk.dart' as sendbird;
 
 class ChatPage extends StatelessWidget {
